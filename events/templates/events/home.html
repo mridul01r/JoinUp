@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to JoinUp</title>
+</head>
+<body>
+    {% if request.user.is_authenticated %}
+        <h1>Hello {{ request.user.username }}, this is JoinUp home page</h1>
+    {% else %}
+        <h1>Hello Guest, please log in to access the JoinUp home page</h1>
+    {% endif %}
+</body>
+</html>
