@@ -76,7 +76,7 @@ def request_to_join(request, event_id):
                 defaults={'status': 'PENDING'}
             )
             if created :
-                messages.success(request, "Your request is successfully send.")
+                messages.success(request, "Your request has been sent successfully.")
                 return redirect('home')
             else :
                 messages.error(request, "Your request already exits. Wait for Owner to change it's status")
