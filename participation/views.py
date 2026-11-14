@@ -1,11 +1,10 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from .models import Participation
-
 from events.models import Event
-from .models import Participation
+
 
 @login_required
 def accept_request(request, participation_id) :
@@ -88,4 +87,15 @@ def request_to_join(request, event_id):
         messages.error(request, 'Event is already full or closed by the owner')
         return redirect('home')
 
-        
+@login_required
+def owner_requests(request):
+    pending_requests = Participation.objects.filter(
+        event__created_by=request.user,
+        status='PENDING'
+    )
+
+    return render(
+        request,
+        'participation/owner_requests.html',
+        {'pending_requests': pending_requests}
+    )

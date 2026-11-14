@@ -6,6 +6,12 @@
     <title>Welcome to JoinUp</title>
 </head>
 <body>
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    
     {% if request.user.is_authenticated %}
         <h1>Hello {{ request.user.username }}, this is JoinUp home page</h1>
     {% else %}

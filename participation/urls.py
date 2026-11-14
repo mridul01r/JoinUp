@@ -12,4 +12,14 @@ urlpatterns = [
         views.reject_request,
         name='reject_request'
     ),
+    path(
+        'request/<int:event_id>/',
+        views.request_to_join,
+        name='request_to_join'
+    ),
+    path(
+        'owner/requests/',
+        views.owner_requests,
+        name='owner_requests'
+    ),
 ]

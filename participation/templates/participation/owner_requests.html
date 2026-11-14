@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requests</title>
+</head>
+<body>
+
+    <h1>Pending Participation Requests</h1>
+
+    {% for participation in pending_requests %}
+
+        <div>
+            <h3>{{ participation.user.username }}</h3>
+            <p>Event: {{ participation.event.title }}</p>
+            <p>Status: {{ participation.status }}</p>
+            <p>Requested At: {{ participation.requested_at }}</p>
+        </div>
+
+    {% empty %}
+
+        <p>No pending requests.</p>
+
+    {% endfor %}
+
+</body>
+</html>
