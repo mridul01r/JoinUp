@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Participation Requests</title>
+</head>
+<body>
+
+    <h1>My Participation Requests</h1>
+
+    {% for my_participation in my_participations %}
+        <div>
+            <h3>{{ my_participation.event.title }}</h3>
+            <p>Location: {{ my_participation.event.location }}</p>
+            <p>Date: {{ my_participation.event.event_date }}</p>
+            <p>Status: {{ my_participation.status }}</p>
+        </div>
+
+        {% if my_participation.status == 'PENDING' %}
+            <div>
+                <form method="POST" action="{% url 'cancel_request' my_participation.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Cancel Request</button>
+                </form>
+            </div>
+        {% endif %}
+    {% empty %}
+        <h2>You haven't requested to join any events yet.</h2>
+    {% endfor %}
+
+</body>
+</html>

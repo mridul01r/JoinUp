@@ -22,4 +22,14 @@ urlpatterns = [
         views.owner_requests,
         name='owner_requests'
     ),
+    path(
+        'my-requests/',
+        views.my_requests,
+        name='my_requests'
+    ),
+    path(
+        'cancel/<int:participation_id>/',
+        views.cancel_request,
+        name='cancel_request'
+    ),
 ]

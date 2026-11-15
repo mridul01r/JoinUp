@@ -7,10 +7,15 @@ from events.models import Event
 
 
 @login_required
+@require_POST
 def accept_request(request, participation_id) :
     participation = get_object_or_404(Participation, id=participation_id)
 
     if request.user == participation.event.created_by :
+        if participation.event.status != 'OPEN':
+            messages.error(request, "This event is not open for participation.")
+            return redirect('home')
+        
         if participation.status == 'PENDING' :
             accepted_participation = participation.event.participation_requests.filter(
                 status='ACCEPTED'
@@ -39,6 +44,7 @@ def accept_request(request, participation_id) :
 
 
 @login_required
+@require_POST
 def reject_request(request, participation_id) :
     participation = get_object_or_404(Participation, id=participation_id)
 
@@ -99,3 +105,40 @@ def owner_requests(request):
         'participation/owner_requests.html',
         {'pending_requests': pending_requests}
     )
+
+@login_required
+def my_requests(request):
+    my_participations = Participation.objects.filter(user=request.user)
+    return render(
+        request,
+        'participation/my_requests.html',
+        {'my_participations': my_participations}
+    )
+
+@login_required
+@require_POST
+def cancel_request(request, participation_id):
+    participation = get_object_or_404(
+        Participation,
+        id=participation_id
+    )
+
+    if request.user == participation.user:
+        if participation.status == 'PENDING':
+            participation.delete()
+            messages.success(
+                request,
+                "Your participation request has been cancelled."
+            )
+        else:
+            messages.error(
+                request,
+                "Only pending requests can be cancelled."
+            )
+    else:
+        messages.error(
+            request,
+            "You are not allowed to perform this action."
+        )
+
+    return redirect('my_requests')

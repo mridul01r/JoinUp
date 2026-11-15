@@ -6,6 +6,11 @@
     <title>Welcome to JoinUp</title>
 </head>
 <body>
+    <nav>
+        <a href="{% url 'event_list' %}">Browse Events</a>
+        <a href="{% url 'my_requests' %}">My Requests</a>
+        <a href="{% url 'create_event' %}">Create Event</a>
+    </nav>
     {% if messages %}
         {% for message in messages %}
             <p>{{ message }}</p>

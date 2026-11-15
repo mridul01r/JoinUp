@@ -18,6 +18,19 @@
             <p>Requested At: {{ participation.requested_at }}</p>
         </div>
 
+        <div>
+            <form method="POST" action="{% url 'accept_request' participation.id %}">
+                {% csrf_token %}
+                <button type="submit">Accept</button>
+            </form>
+
+            <form method="POST" action="{% url 'reject_request' participation.id %}">
+                {% csrf_token %}
+                <button type="submit">Reject</button>
+            </form>
+        </div>
+        
+
     {% empty %}
 
         <p>No pending requests.</p>
