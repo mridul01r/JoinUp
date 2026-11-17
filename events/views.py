@@ -105,6 +105,10 @@ def delete_event(request, event_id):
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
 
+    request_status = event.participation_requests.filter(
+        user=request.user
+    ).first()
+
     accepted_participants = event.participation_requests.filter(
         status='ACCEPTED'
     ).count()
@@ -116,6 +120,7 @@ def event_detail(request, event_id):
         {
             'event': event,
             'accepted_participants': accepted_participants,
-            'available_spots': available_spots
+            'available_spots': available_spots,
+            'request_status': request_status
         }
     )

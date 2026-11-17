@@ -6,6 +6,43 @@
     <title>Event Details </title>
 </head>
 <body>
+
+    {% if request.user == event.created_by %}
+        <p>You are the event creator</p>
+    {% else %}
+        {% if request_status %}
+            {% if request_status.status == 'PENDING' %}
+                <p>Your request is pending</p>
+
+                <form method="POST" action="{% url 'cancel_request' request_status.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Cancel Request</button>
+                </form>
+                
+            {% elif request_status.status == 'ACCEPTED' %}
+                <p>Your request has been accepted!</p>
+            {% else %}
+                <p>Your request was rejected</p>
+
+                <form method="POST" action="{% url 'request_to_join' event.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Request Again</button>
+                </form>
+            {% endif %}
+        {% else %}
+            {% if event.status == 'OPEN' and available_spots > 0 %}
+                <p>You can request to join</p>
+
+                <form method="POST" action="{% url 'request_to_join' event.pk %}">
+                    {% csrf_token %}
+                    <button type="submit">Request to join</button>
+                </form>
+            {% else %}
+                <p>Event is {{ event.status }}</p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
     <h1>Event Title : {{ event.title }}</h1>
     <h2>Event Description : </h2>
     <p>{{ event.description }}</p>

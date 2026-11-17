@@ -80,12 +80,24 @@ def request_to_join(request, event_id):
                 event=event,
                 defaults={'status': 'PENDING'}
             )
-            if created :
+            if created:
                 messages.success(request, "Your request has been sent successfully.")
                 return redirect('home')
-            else :
-                messages.error(request, "Your request already exits. Wait for Owner to change it's status")
-                return redirect('home')
+
+            else:
+                if participation.status == 'REJECTED':
+                    participation.status = 'PENDING'
+                    participation.save()
+
+                    messages.success(request, "Your request has been sent again successfully.")
+                    return redirect('home')
+
+                else:
+                    messages.error(
+                        request,
+                        "Your request already exists. Wait for the owner to change its status."
+                    )
+                    return redirect('home')
         else :
             messages.error(request, 'You can not join because Event is already full')
             return redirect('home')
