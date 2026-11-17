@@ -22,5 +22,10 @@ urlpatterns = [
         'delete/<int:event_id>/',
         views.delete_event,
         name='delete_event'
-    )
+    ),
+    path(
+        '<int:event_id>/',
+        views.event_detail,
+        name='event_detail'
+    ),
 ]

@@ -18,6 +18,10 @@
         <h2>{{ event.title }}</h2>
         <p>Event ID: {{ event.pk }}</p>
         <p>Date & Time: {{ event.event_date|date:"d M Y, h:i A" }}</p>
+        <a href="{% url 'event_detail' event.pk %}">
+            View Details
+        </a>
+        
         {% if request.user != event.created_by %}
             <form method="POST" action="{% url 'request_to_join' event.pk %}">
                 {% csrf_token %}

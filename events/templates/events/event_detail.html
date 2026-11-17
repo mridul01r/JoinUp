@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Details </title>
+</head>
+<body>
+    <h1>Event Title : {{ event.title }}</h1>
+    <h2>Event Description : </h2>
+    <p>{{ event.description }}</p>
+    <p>Category : {{ event.category }}</p>
+    <p>Event Location : {{ event.location }}</p>
+    <p>Event Date: {{ event.event_date|date:"d M Y, h:i A" }}</p>
+    <p>Created by: {{ event.created_by.username }}</p>
+    <p>Max Participants : {{ event.max_participants }}</p>
+    <p>
+        Participants: {{ accepted_participants }} / {{ event.max_participants }}
+    </p>
+    <p>Available Spots: {{ available_spots }}</p>
+    <p>Status : {{ event.status }}</p>
+    
+</body>
+</html>

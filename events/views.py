@@ -99,3 +99,23 @@ def delete_event(request, event_id):
 
     messages.success(request, "Event successfully deleted.")
     return redirect('event_list')
+
+
+@login_required
+def event_detail(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    accepted_participants = event.participation_requests.filter(
+        status='ACCEPTED'
+    ).count()
+    available_spots = event.max_participants - accepted_participants
+
+    return render(
+        request,
+        'events/event_detail.html',
+        {
+            'event': event,
+            'accepted_participants': accepted_participants,
+            'available_spots': available_spots
+        }
+    )
