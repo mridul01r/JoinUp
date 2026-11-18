@@ -14,7 +14,10 @@ def accept_request(request, participation_id) :
     if request.user == participation.event.created_by :
         if participation.event.status != 'OPEN':
             messages.error(request, "This event is not open for participation.")
-            return redirect('home')
+            return redirect(
+                'event_detail',
+                event_id=participation.event.id
+            )
         
         if participation.status == 'PENDING' :
             accepted_participation = participation.event.participation_requests.filter(
@@ -31,16 +34,28 @@ def accept_request(request, participation_id) :
 
                 participation.save()
                 messages.success(request, "Participation request Accepted successfully.")
-                return redirect('home')
+                return redirect(
+                    'event_detail',
+                    event_id=participation.event.id
+                )
             else :
                 messages.error(request, "Event is full.")
-                return redirect('home')
+                return redirect(
+                    'event_detail',
+                    event_id=participation.event.id
+                )
         else :
             messages.error(request, "There Is No Pending Or New Request")
-            return redirect('home')
+            return redirect(
+                'event_detail',
+                event_id=participation.event.id
+            )
     else :
         messages.error(request, "Only the event creator can manage participation requests.")
-        return redirect('home')
+        return redirect(
+            'event_detail',
+            event_id=participation.event.id
+        )
 
 
 @login_required
@@ -53,14 +68,23 @@ def reject_request(request, participation_id) :
             participation.status = 'REJECTED'
             participation.save()
             messages.success(request, "Participation request rejected successfully.")
-            return redirect('home')
+            return redirect(
+                'event_detail',
+                event_id=participation.event.id
+            )
         
         else :
             messages.error(request, "There Is No Pending Or New Request")
-            return redirect('home')
+            return redirect(
+                'event_detail',
+                event_id=participation.event.id
+            )
     else :
         messages.error(request, "Only the event creator can manage participation requests.")
-        return redirect('home')
+        return redirect(
+            'event_detail',
+            event_id=participation.event.id
+        )
 
 
 @login_required
@@ -69,7 +93,7 @@ def request_to_join(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.user == event.created_by:
         messages.error(request, "You cannot join your own event.")
-        return redirect('home')
+        return redirect('event_detail', event_id=event.id)
     
     if event.status == 'OPEN' :
         accepted_participation = event.participation_requests.filter(status='ACCEPTED').count()
@@ -82,7 +106,7 @@ def request_to_join(request, event_id):
             )
             if created:
                 messages.success(request, "Your request has been sent successfully.")
-                return redirect('home')
+                return redirect('event_detail', event_id=event.id)
 
             else:
                 if participation.status == 'REJECTED':
@@ -90,20 +114,20 @@ def request_to_join(request, event_id):
                     participation.save()
 
                     messages.success(request, "Your request has been sent again successfully.")
-                    return redirect('home')
+                    return redirect('event_detail', event_id=event.id)
 
                 else:
                     messages.error(
                         request,
                         "Your request already exists. Wait for the owner to change its status."
                     )
-                    return redirect('home')
+                    return redirect('event_detail', event_id=event.id)
         else :
             messages.error(request, 'You can not join because Event is already full')
-            return redirect('home')
+            return redirect('event_detail', event_id=event.id)
     else :
         messages.error(request, 'Event is already full or closed by the owner')
-        return redirect('home')
+        return redirect('event_detail', event_id=event.id)
 
 @login_required
 def owner_requests(request):
@@ -135,6 +159,8 @@ def cancel_request(request, participation_id):
         id=participation_id
     )
 
+    event_id = participation.event.id
+
     if request.user == participation.user:
         if participation.status == 'PENDING':
             participation.delete()
@@ -153,4 +179,4 @@ def cancel_request(request, participation_id):
             "You are not allowed to perform this action."
         )
 
-    return redirect('my_requests')
+    return redirect('event_detail', event_id=event_id)
