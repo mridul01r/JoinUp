@@ -12,7 +12,68 @@
         {% endfor %}
     {% endif %}
 
-     <h1>Available Events</h1>
+    <h3>Discover Events</h3>
+
+    <form method="GET" action="{% url 'event_list' %}">
+
+        <!-- Search by title -->
+        <input
+            type="text"
+            name="q"
+            placeholder="Search events..."
+            value="{{ search_query }}"
+        >
+
+        <!-- Filter by category -->
+        <select name="category">
+            <option value="">All Categories</option>
+
+            {% for category in categories %}
+                <option value="{{ category.id }}"
+                    {% if category_id == category.id|stringformat:"s" %}
+                        selected
+                    {% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <!-- Filter by location -->
+        <input 
+            type="text"
+            name="location"
+            placeholder="Search by city or location..."
+            value="{{ location_query }}"
+        >
+        <!-- Sort events -->
+        <label for="sort">Sort By:</label>
+
+        <select name="sort" id="sort">
+            <option value="upcoming"
+                {% if sort_by == 'upcoming' %}selected{% endif %}>
+                Upcoming Events
+            </option>
+
+            <option value="newest"
+                {% if sort_by == 'newest' %}selected{% endif %}>
+                Newest First
+            </option>
+
+            <option value="oldest"
+                {% if sort_by == 'oldest' %}selected{% endif %}>
+                Oldest First
+            </option>
+        </select>    
+            
+        <button type="submit">Search & Filter</button>
+
+        <a href="{% url 'event_list' %}">Clear Filters</a>
+
+    </form>
+
+    
+
+    
 
     {% for event in events %}
         <h2>{{ event.title }}</h2>
@@ -39,9 +100,32 @@
             </form>
             
         {% endif %}
+
     {% empty %}
         <p>No events available.</p>
+        
     {% endfor %}
+
+    <div class="pagination">
+
+        {% if page_obj.has_previous %}
+            <a href="?q={{ search_query }}&category={{ category_id|default:'' }}&location={{ location_query }}&sort={{ sort_by }}&page={{ page_obj.previous_page_number }}">
+                Previous
+            </a>
+        {% endif %}
+
+        <span>
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?q={{ search_query }}&category={{ category_id|default:'' }}&location={{ location_query }}&sort={{ sort_by }}&page={{ page_obj.next_page_number }}">
+                Next
+            </a>
+        {% endif %}
+
+    </div>
+
 
 </body>
 </html>

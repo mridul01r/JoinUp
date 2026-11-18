@@ -1,8 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator
 from django.contrib import messages
+from django.utils import timezone
 from .models import Event
+from .models import Category
 from .forms import EventForm
 
 @login_required
@@ -15,11 +18,58 @@ def home(request):
 @login_required
 def event_list(request):
     events = Event.objects.filter(status='OPEN')
+    categories = Category.objects.all()
+
+    category_id = request.GET.get('category')
+    search_query = request.GET.get('q', '')
+    location_query = request.GET.get('location', '')
+
+    if search_query:
+        events = events.filter(title__icontains=search_query)
+
+    if category_id:
+        events = events.filter(category__id=category_id)
+
+    if location_query:
+        events = events.filter(location__icontains=location_query)
+
+    sort_by = request.GET.get('sort', 'upcoming')
+
+    if sort_by == 'upcoming':
+        events = events.filter(
+            event_date__gte=timezone.now()
+        ).order_by('event_date')
+
+    elif sort_by == 'newest':
+        events = events.order_by('-created_at')
+
+    elif sort_by == 'oldest':
+        events = events.order_by('created_at')
+
+    else:
+        sort_by = 'upcoming'
+        events = events.filter(
+            event_date__gte=timezone.now()
+        ).order_by('event_date')
+
+    paginator = Paginator(events, 5)
+
+    page_number = request.GET.get('page')
+
+    page_obj = paginator.get_page(page_number)
 
     return render(
         request,
         'events/event_list.html',
-        {'events': events}
+        {
+            'events': page_obj,
+            'search_query': search_query,
+            'categories': categories,
+            'category_id': category_id,
+            'location_query': location_query,
+            'page_obj': page_obj,
+            'sort_by': sort_by
+        }
     )
 
 @login_required
