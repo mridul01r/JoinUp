@@ -1,9 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import ExpressionWrapper, FloatField
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
+from django.db.models import Count, Q
+from django.db.models import F, Value
 from django.contrib import messages
 from django.utils import timezone
+from datetime import date
 from .models import Event
 from .models import Category
 from .forms import EventForm
@@ -17,12 +21,33 @@ def home(request):
 
 @login_required
 def event_list(request):
-    events = Event.objects.filter(status='OPEN')
+    events = Event.objects.filter(
+        status='OPEN'
+    ).select_related(
+        'category',
+        'created_by'
+    ).annotate(
+        accepted_count=Count(
+            'participation_requests',
+            filter=Q(participation_requests__status='ACCEPTED')
+        )
+    ).annotate(
+        available_spots=F('max_participants') - F('accepted_count')
+    ).annotate(
+        occupancy_percentage=ExpressionWrapper(
+            F('accepted_count') * 100.0 / F('max_participants'),
+            output_field=FloatField()
+        )
+    )
     categories = Category.objects.all()
 
     category_id = request.GET.get('category')
     search_query = request.GET.get('q', '')
     location_query = request.GET.get('location', '')
+
+    # date_query = request.GET.get('date', '')
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
 
     if search_query:
         events = events.filter(title__icontains=search_query)
@@ -32,6 +57,23 @@ def event_list(request):
 
     if location_query:
         events = events.filter(location__icontains=location_query)
+
+    if start_date and end_date :
+        start = date.fromisoformat(start_date)
+        end = date.fromisoformat(end_date)
+
+        if start > end:
+            messages.error(
+                request,
+                'Invalid date range. Start date must be earlier than or equal to the end date.'
+            )
+            return redirect('event_list')
+        
+    if start_date:
+        events = events.filter(event_date__date__gte=start_date)
+
+    if end_date:
+        events = events.filter(event_date__date__lte=end_date)
 
     sort_by = request.GET.get('sort', 'upcoming')
 
@@ -53,9 +95,7 @@ def event_list(request):
         ).order_by('event_date')
 
     paginator = Paginator(events, 5)
-
     page_number = request.GET.get('page')
-
     page_obj = paginator.get_page(page_number)
 
     return render(
@@ -67,6 +107,9 @@ def event_list(request):
             'categories': categories,
             'category_id': category_id,
             'location_query': location_query,
+            # 'date_query': date_query,
+            'start_date': start_date,
+            'end-date': end_date,
             'page_obj': page_obj,
             'sort_by': sort_by
         }
