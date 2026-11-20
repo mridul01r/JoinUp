@@ -12,6 +12,7 @@ from .models import Event
 from .models import Category
 from .forms import EventForm
 
+
 @login_required
 def home(request):
     return render(
@@ -217,3 +218,4 @@ def event_detail(request, event_id):
             'request_status': request_status
         }
     )
+

@@ -1,33 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Participation Requests</title>
 </head>
+
 <body>
 
-    <h1>My Participation Requests</h1>
 
-    {% for my_participation in my_participations %}
+    <div class="request-filters">
         <div>
-            <h3>{{ my_participation.event.title }}</h3>
-            <p>Location: {{ my_participation.event.location }}</p>
-            <p>Date: {{ my_participation.event.event_date }}</p>
-            <p>Status: {{ my_participation.status }}</p>
+            <a href="{% url 'my_requests' %}">
+                All Requests : {{ total_request }}
+            </a>
+            <a href="?status=PENDING">
+                Pending : {{ pending_count }}
+            </a>
+            <a href="?status=ACCEPTED">
+                Accepted : {{ accepted_count }}
+            </a>
+            <a href="?status=REJECTED">
+                Rejected : {{ rejected_count }}
+            </a>
         </div>
 
-        {% if my_participation.status == 'PENDING' %}
-            <div>
-                <form method="POST" action="{% url 'cancel_request' my_participation.id %}">
-                    {% csrf_token %}
-                    <button type="submit">Cancel Request</button>
-                </form>
-            </div>
-        {% endif %}
+
+        <div>
+            <p>Pending: {{ pending_count }} ({{ pending_rate }}%)</p>
+            <progress value="{{ pending_rate }}" max="100"></progress>
+        </div>
+
+        <div>
+            <p>Accepted: {{ accepted_count }} ({{ accepted_rate }}%)</p>
+            <progress value="{{ accepted_rate }}" max="100"></progress>
+        </div>
+
+        <div>
+            <p>Rejected: {{ rejected_count }} ({{ rejected_rate }}%)</p>
+            <progress value="{{ rejected_rate }}" max="100"></progress>
+        </div>
+
+
+
+    </div>
+
+
+    <h1>My Participation Requests</h1>
+    <form method="GET" action="{% url 'my_requests' %}">
+        <input
+            type="text"
+            name="q"
+            placeholder="Search events..."
+            value="{{ search_query }}"
+        >
+
+        <button type="submit">
+             Search
+        </button>
+    </form>
+
+    {% for my_participation in my_participations %}
+    <div>
+        <h3>{{ my_participation.event.title }}</h3>
+        <p>Location: {{ my_participation.event.location }}</p>
+        <p>Date: {{ my_participation.event.event_date }}</p>
+        <p>Status: {{ my_participation.status }}</p>
+    </div>
+
+    {% if my_participation.status == 'PENDING' %}
+    <div>
+        <form method="POST" action="{% url 'cancel_request' my_participation.id %}">
+            {% csrf_token %}
+            <button type="submit">Cancel Request</button>
+        </form>
+    </div>
+    {% endif %}
     {% empty %}
-        <h2>You haven't requested to join any events yet.</h2>
+    <h2>You haven't requested to join any events yet.</h2>
     {% endfor %}
 
+    <div class="pagination">
+
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&status={{ status_filter }}">
+                Previous
+            </a>
+        {% endif %}
+
+        <span>
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&status={{ status_filter }}">
+                Next
+            </a>
+        {% endif %}
+
+    </div>
+
 </body>
+
 </html>
