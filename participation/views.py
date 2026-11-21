@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from .models import Participation
+from notifications.models import Notification
 from events.models import Event
 
 
@@ -35,6 +36,13 @@ def accept_request(request, participation_id):
                     participation.event.save()
 
                 participation.save()
+
+                Notification.objects.create(
+                    recipient=participation.user,
+                    event=participation.event,
+                    message=f'Your request to join {participation.event.title} has been accepted.'
+                )
+                
                 messages.success(
                     request, "Participation request Accepted successfully.")
                 return redirect(
@@ -71,6 +79,12 @@ def reject_request(request, participation_id):
         if participation.status == 'PENDING':
             participation.status = 'REJECTED'
             participation.save()
+
+            Notification.objects.create(
+                recipient=participation.user,
+                event=participation.event,
+                message=f'Your request to join {participation.event.title} has been rejected.'
+            )
             messages.success(
                 request, "Participation request rejected successfully.")
             return redirect(
