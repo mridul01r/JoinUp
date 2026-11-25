@@ -232,4 +232,20 @@ class ParticipationSecurityTests(TestCase):
         self.assertTrue(
             Participation.objects.filter(id=self.participation.id).exists()
         )
-        
+
+    def test_user_can_cancel_own_pending_request(self):
+        self.client.login(
+            username=self.participant.username,
+            password='testpass123'
+        )
+
+        url = reverse(
+            'cancel_request',
+            args=[self.participation.id] 
+        )
+
+        response = self.client.post(url)
+
+        self.assertFalse(
+            Participation.objects.filter(id=self.participation.id).exists()        
+        )
